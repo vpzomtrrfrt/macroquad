@@ -497,18 +497,18 @@ impl Painter {
         let rect = rect.into();
 
         self.clipping_zone = if let Some(rect) = rect {
-            let dpi = crate::get_context().quad_context.dpi_scale();
-
-            let mut rect = rect;
-            rect.scale(dpi, dpi);
-
             Some(self.clipping_zone.and_then(|old_rect| old_rect.intersect(rect)).unwrap_or(rect))
         } else {
             None
         };
 
+        let dpi = crate::get_context().quad_context.dpi_scale();
+        let scaled_clipping_zone = self.clipping_zone.map(|rect| {
+            Rect::new(rect.x * dpi, rect.y * dpi, rect.w * dpi, rect.h * dpi)
+        });
 
-        self.add_command(DrawCommand::Clip { rect: self.clipping_zone });
+
+        self.add_command(DrawCommand::Clip { rect: scaled_clipping_zone });
     }
 }
 
